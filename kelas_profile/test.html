@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Like & Comment</title>
+</head>
+<body>
+    <h1>Test Like & Comment System</h1>
+    
+    <div class="post-card" id="post-1">
+        <h3>Post Test</h3>
+        <p>Ini adalah post untuk testing</p>
+        
+        <div class="post-stats">
+            <span class="like-count" id="like-count-1">0 suka</span>
+            <span class="comment-count" id="comment-count-1">0 komentar</span>
+        </div>
+        
+        <div class="post-actions">
+            <button onclick="toggleLike(1)" id="like-btn-1">🤍 Suka</button>
+            <button onclick="focusComment(1)">💬 Komentar</button>
+        </div>
+        
+        <div class="comments-section">
+            <div class="comments-container" id="comments-1"></div>
+            
+            <div class="comment-form">
+                <input type="text" id="comment-name-1" placeholder="Nama Anda">
+                <textarea id="comment-text-1" placeholder="Tulis komentar..."></textarea>
+                <button onclick="submitComment(1)">Kirim</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Simple test functions
+    function toggleLike(postId) {
+        console.log('Like clicked for post:', postId);
+        const userName = prompt('Masukkan nama:');
+        if (!userName) return;
+        
+        fetch('action.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'action=like&post_id=' + postId + '&user_name=' + encodeURIComponent(userName)
+        })
+        .then(r => r.json())
+        .then(data => {
+            console.log('Like response:', data);
+            if (data.success) {
+                document.getElementById('like-count-' + postId).textContent = data.like_count + ' suka';
+                document.getElementById('like-btn-' + postId).textContent = data.liked ? '❤️ Disukai' : '🤍 Suka';
+                alert(data.liked ? 'Liked!' : 'Unliked!');
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(err => console.error('Error:', err));
+    }
+    
+    function submitComment(postId) {
+        const userName = document.getElementById('comment-name-' + postId).value;
+        const comment = document.getElementById('comment-text-' + postId).value;
+        
+        if (!userName || !comment) {
+            alert('Isi nama dan komentar!');
+            return;
+        }
+        
+        fetch('action.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'action=comment&post_id=' + postId + '&user_name=' + encodeURIComponent(userName) + '&comment=' + encodeURIComponent(comment)
+        })
+        .then(r => r.json())
+        .then(data => {
+            console.log('Comment response:', data);
+            if (data.success) {
+                document.getElementById('comment-text-' + postId).value = '';
+                document.getElementById('comment-count-' + postId).textContent = data.comment_count + ' komentar';
+                alert('Komentar berhasil!');
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(err => console.error('Error:', err));
+    }
+    
+    function focusComment(postId) {
+        document.getElementById('comment-name-' + postId).focus();
+    }
+    </script>
+</body>
+</html>
